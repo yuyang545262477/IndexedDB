@@ -89,7 +89,7 @@
         var indexDB = window.indexDB || window.webkitIndexDB || window.mozIndexDB || window.msIndexDB || false,
             IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.mozIDBKeyRange || window.msIDBKeyRange || false,
             webSQLSupport = ('openDatabase' in window);
-        //舒适化数据库
+        //初始化数据库
         var db;
 
         var openDB = function () {
@@ -101,8 +101,11 @@
                 request.onsuccess = function (e) {//数据库成功打开调用的函数
                     db = e.target.result;
                     if (!upgradeNeeded && db.version != '1') {
-                        //如果数据库不是首次打开
-                        var setVersionRequest = db.setVersion('1');//把数据库版本号设为1
+                        //如果是旧版本的IndexedDB
+                        //有一些旧的浏览器，支持IndexedDB 但是支持的是旧版本的IndexedDB
+                        //在旧版本中，并不支持onupgradeneeded更新数据库版本信息
+                        var setVersionRequest = db.setVersion('1');
+                        //使用旧的aip:setversion 把数据库版本号设为1
                         setVersionRequest.onsuccess = function (e) {
                             var objectStore = db.createObjectStore('tasks', { Keypath: 'id' });
                             objectStore.createIndex('desc', 'descUpper', { unique: false });
@@ -113,7 +116,9 @@
                     }
                 };
                 if (upgradeNeeded) {
-                    //如果是第一次打开数据库
+                    //如果浏览器的IndexedDB版本支持onupgradeneeded。
+                    //如果请求时输入的数据库版本号，高于浏览器当中的版本号，触发upgradeNeeded
+                    //在upgrade need 事件期间，你有机会通过添加或移除{store,键,索引}来操作object store
                     request.onupgradeneeded = function (e) {
                         db = e.target.result;
                         var objectStore = db.createObjectStore('tasks', { Keypath: 'id' });
@@ -134,7 +139,7 @@
 
             }
         };
-        open();
+        openDB();
 
 
     };
