@@ -86,16 +86,17 @@
         document.forms.settings.addEventListener('reset', resetSettings, false);
         //开始使用indexedDB数据库 来完善 list 和 add <section>里的内容
         //鉴定
-        var indexDB = window.indexDB || window.webkitIndexDB || window.mozIndexDB || window.msIndexDB || false,
+        var indexedDB = window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.msIndexedDB || false,
             IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.mozIDBKeyRange || window.msIDBKeyRange || false,
             webSQLSupport = ('openDatabase' in window);
+
         //初始化数据库
         var db;
 
         var openDB = function () {
-            // 如果支持indexDB
-            if (indexDB) {
-                var request = indexDB.open('tasks', 1),
+            // 如果支持indexedDB
+            if (indexedDB) {
+                var request = indexedDB.open('tasks', 1),
                     upgradeNeeded = ('onupgradeneeded' in request);
                 //第一次打开数据库会调用onupgradeneeded函数。
                 request.onsuccess = function (e) {//数据库成功打开调用的函数
